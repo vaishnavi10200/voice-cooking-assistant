@@ -1,0 +1,103 @@
+[
+  {
+    "title": "Masala Dosa",
+    "time": "35 mins",
+    "image": "assets/masala_dosa.jpg",
+    "steps": [
+      "Soak rice and urad dal overnight.",
+      "Grind them to make smooth batter.",
+      "Ferment for 8 hours.",
+      "Make dosas on hot tawa.",
+      "Serve with chutney."
+    ]
+  },
+  {
+    "title": "Paneer Butter Masala",
+    "time": "40 mins",
+    "image": "assets/paneer.jpg",
+    "steps": [
+      "Heat butter and sauté onions.",
+      "Add tomato puree and cook.",
+      "Add spices and paneer.",
+      "Simmer for 5 minutes.",
+      "Garnish and serve hot."
+    ]
+  },
+  {
+    "title": "Aloo Paratha",
+    "time": "25 mins",
+    "image": "assets/aloo-paratha.jpg",
+    "steps": [
+      "Boil and mash potatoes.",
+      "Mix with spices to make filling.",
+      "Stuff into dough and roll.",
+      "Cook on tawa with ghee.",
+      "Serve with curd and pickle."
+    ]
+  },
+  {
+  "title": "Pancakes",
+  "time": "20 mins",
+  "image": "assets/pancakes.jpg",
+  "steps": [
+    "In a bowl, mix flour, sugar, baking powder, and salt.",
+    "Add milk, egg, and melted butter. Whisk well.",
+    "Pour batter on a hot pan and cook until bubbles form.",
+    "Flip and cook the other side until golden brown.",
+    "Serve with maple syrup or fruits."
+    ]
+  },
+  {
+  "title": "Chole Bhature",
+  "time": "45 mins",
+  "image": "assets/chole_bhature.jpg",
+  "steps": [
+    "Soak chickpeas overnight.",
+    "Pressure cook chickpeas with tea bags and spices.",
+    "Prepare spicy gravy with tomatoes and onions.",
+    "Knead dough for bhature and let it rest.",
+    "Roll out bhature and deep fry.",
+    "Serve hot with chole, onion rings, and lemon."
+  ]
+},
+{
+  "title": "Vegetable Biryani",
+  "time": "50 mins",
+  "image": "assets/vegetable-biryani.jpg",
+ "steps": [
+    "Wash and soak basmati rice.",
+    "Sauté whole spices and onions in oil.",
+    "Add chopped vegetables and biryani masala.",
+    "Layer rice and veggie mix, cover and cook.",
+    "Garnish with mint, fried onions, and serve hot."
+  ]
+},
+{
+  "title": "Chocolate Cake",
+  "time": "60 mins",
+  "image": "assets/chocolate_cake.jpg",
+  "steps": [
+    "Preheat oven to 180 degrees Celsius.",
+    "Mix flour, cocoa powder, and baking soda.",
+    "Blend sugar, oil, and eggs in another bowl.",
+    "Combine wet and dry ingredients.",
+    "Pour into greased pan and bake for 30 minutes.",
+    "Cool and frost with chocolate ganache."
+  ]
+},
+{
+  "title": "Idli Sambar",
+  "time": "30 mins",
+  "image": "assets/idli-sambar.jpg",
+  "steps": [
+    "Soak rice and urad dal overnight.",
+    "Grind into batter and ferment.",
+    "Pour into idli molds and steam for 10 minutes.",
+    "Boil toor dal and mix with veggies for sambar.",
+    "Add sambar masala and temper with mustard seeds.",
+    "Serve idli with hot sambar and coconut chutney."
+  ]
+}
+
+
+]

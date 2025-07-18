@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Cooking Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+  <div class="header-container">
+    <div class="floating-elements">
+      <div class="floating-emoji">🍳</div>
+      <div class="floating-emoji">🥘</div>
+      <div class="floating-emoji">👨‍🍳</div>
+      <div class="floating-emoji">🍲</div>
+      <div class="floating-emoji">🎙️</div>
+      <div class="floating-emoji">✨</div>
+    </div>
+    
+    <div class="title-container">
+      <div class="main-icon">🍳</div>
+      <h1 class="main-title">Voice Cooking Assistant</h1>
+      <p class="subtitle">Cook hands-free with voice commands</p>
+    </div>
+    
+    <div class="buttons-container">
+      <button class="voice-button start-button" id="start-btn">
+        <span class="button-icon">🎙️</span>
+        Start Cooking
+        <div class="status-indicator"></div>
+      </button>
+      <button class="voice-button stop-button" id="stop-btn">
+        <span class="button-icon">⏹️</span>
+        Stop Listening
+      </button>
+    </div>
+  </div>
+
+  <main>
+    <section id="recipe-list">
+      <!-- Recipe cards inserted here -->
+    </section>
+
+    <section id="recipe-view" hidden>
+      <h2 id="recipe-title"></h2>
+      <div id="steps">
+        <p id="current-step">Click a recipe or say its name to begin.</p>
+      </div>
+      <div id="voice-console">
+        <p id="user-said">You said: ...</p>
+        <p id="assistant-reply">Assistant: ...</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
