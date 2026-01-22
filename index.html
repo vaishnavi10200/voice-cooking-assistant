@@ -4,52 +4,89 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Voice Cooking Assistant</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="style.css" rel="stylesheet">
 </head>
 <body>
-  <div class="header-container">
-    <div class="floating-elements">
-      <div class="floating-emoji">🍳</div>
-      <div class="floating-emoji">🥘</div>
-      <div class="floating-emoji">👨‍🍳</div>
-      <div class="floating-emoji">🍲</div>
-      <div class="floating-emoji">🎙️</div>
-      <div class="floating-emoji">✨</div>
+  <header class="header">
+    <div class="container">
+      <div class="header-top">
+        <div class="logo">
+          <span class="logo-icon">🍳</span>
+          <span class="logo-text">Voice Kitchen</span>
+        </div>
+        <div class="user-profile">
+          <span class="user-name">Welcome</span>
+          <div class="avatar">👤</div>
+        </div>
+      </div>
+      
+      <div class="header-main">
+        <h1 class="main-heading">Hi there,</h1>
+        <h2 class="sub-heading">let us help you cook with voice!</h2>
+        
+        <div class="voice-controls">
+          <button class="btn-voice" id="start-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+            Start Voice
+          </button>
+          <button class="btn-stop" id="stop-btn">Stop</button>
+        </div>
+      </div>
     </div>
-    
-    <div class="title-container">
-      <div class="main-icon">🍳</div>
-      <h1 class="main-title">Voice Cooking Assistant</h1>
-      <p class="subtitle">Cook hands-free with voice commands</p>
-    </div>
-    
-    <div class="buttons-container">
-      <button class="voice-button start-button" id="start-btn">
-        <span class="button-icon">🎙️</span>
-        Start Cooking
-        <div class="status-indicator"></div>
-      </button>
-      <button class="voice-button stop-button" id="stop-btn">
-        <span class="button-icon">⏹️</span>
-        Stop Listening
-      </button>
-    </div>
-  </div>
+  </header>
 
-  <main>
-    <section id="recipe-list">
-      <!-- Recipe cards inserted here -->
+  <main class="container">
+    <section class="recipes-section">
+      <div class="section-header">
+        <h3 class="section-title">Popular Recipes</h3>
+        <span class="result-count"></span>
+      </div>
+      
+      <div id="recipe-list" class="recipe-grid">
+        <!-- Recipe cards inserted here -->
+      </div>
     </section>
 
-    <section id="recipe-view" hidden>
-      <h2 id="recipe-title"></h2>
-      <div id="steps">
-        <p id="current-step">Click a recipe or say its name to begin.</p>
-      </div>
-      <div id="voice-console">
-        <p id="user-said">You said: ...</p>
-        <p id="assistant-reply">Assistant: ...</p>
+    <section id="recipe-view" class="recipe-detail" hidden>
+      <button class="back-link" onclick="location.reload()">
+        ← Back to recipes
+      </button>
+      
+      <div class="detail-card">
+        <h2 id="recipe-title" class="detail-title"></h2>
+        
+        <div class="step-box">
+          <div class="step-header">
+            <span class="step-badge">Current Step</span>
+          </div>
+          <p id="current-step" class="step-text">Select a recipe to begin</p>
+        </div>
+        
+        <div class="voice-activity">
+          <h4 class="activity-heading">Voice Activity</h4>
+          <div id="voice-feedback" class="activity-list">
+            <div class="activity-item">
+              <div class="activity-icon user-icon">👤</div>
+              <div class="activity-content">
+                <span class="activity-label">You said:</span>
+                <span id="user-said" class="activity-text">...</span>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon assistant-icon">🤖</div>
+              <div class="activity-content">
+                <span class="activity-label">Response:</span>
+                <span id="assistant-reply" class="activity-text">...</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
