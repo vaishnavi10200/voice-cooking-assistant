@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Favorites - Voice Kitchen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="../style.css" rel="stylesheet">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="header-top">
+        <div class="logo">
+          <img src="../assets/voice-kitchen-logo.png" alt="Voice Kitchen" class="logo-img">
+        </div>
+        <div class="user-profile" id="user-profile">
+          <span class="user-name" id="user-name">Welcome</span>
+          <div class="avatar" id="user-avatar">👤</div>
+          
+          <div class="profile-dropdown" id="profile-dropdown" hidden>
+            <div class="dropdown-item" id="home-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              Home
+            </div>
+            <div class="dropdown-item" id="profile-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              Profile
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" id="signout-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              Sign Out
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="header-main">
+        <h1 class="main-heading">My Favorites</h1>
+        <p class="sub-heading">Your saved recipes ❤️</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="favorites-section">
+      <div class="section-header">
+        <h3 class="section-title">Saved Recipes</h3>
+        <span class="result-count" id="favorites-count">0 recipes</span>
+      </div>
+      
+      <!-- Loading State -->
+      <div id="loading-state" class="empty-state">
+        <div class="loading-spinner"></div>
+        <p>Loading your favorites...</p>
+      </div>
+      
+      <!-- Empty State -->
+      <div id="empty-state" class="empty-state" hidden>
+        <div class="empty-icon">💔</div>
+        <h3>No favorites yet</h3>
+        <p>Start adding recipes to your favorites to see them here!</p>
+        <a href="../index.html" class="btn-primary">Browse Recipes</a>
+      </div>
+      
+      <!-- Recipes Grid -->
+      <div id="favorites-list" class="recipe-grid" hidden>
+        <!-- Favorite recipe cards will be inserted here -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  
+  <!-- Firebase Config -->
+  <script src="../js/firebase-config.js"></script>
+  
+  <!-- Firestore Helper -->
+  <script src="../js/firestore.js"></script>
+  
+  <!-- Favorites Logic -->
+  <script src="../js/favorites.js"></script>
+  
+  <!-- Favorites Page Script -->
+  <script>
+    let currentUser = null;
+    
+    // Initialize page
+    firebase.auth().onAuthStateChanged(async (user) => {
+      if (!user) {
+        // Redirect to auth if not signed in
+        window.location.href = 'auth.html';
+        return;
+      }
+      
+      currentUser = user;
+      
+      // Update user profile
+      const userName = document.getElementById('user-name');
+      const userAvatar = document.getElementById('user-avatar');
+      
+      const displayName = user.displayName || user.email.split('@')[0];
+      userName.textContent = displayName;
+      
+      if (user.photoURL) {
+        userAvatar.innerHTML = `<img src="${user.photoURL}" alt="${displayName}" class="avatar-img">`;
+      } else {
+        userAvatar.textContent = displayName.charAt(0).toUpperCase();
+      }
+      
+      userAvatar.onclick = toggleProfileDropdown;
+      
+      // Load favorites
+      await loadFavorites(user.uid);
+    });
+    
+    // Toggle profile dropdown
+    function toggleProfileDropdown() {
+      const dropdown = document.getElementById('profile-dropdown');
+      dropdown.hidden = !dropdown.hidden;
+      
+      if (!dropdown.hidden) {
+        setTimeout(() => {
+          document.addEventListener('click', closeDropdownOutside);
+        }, 100);
+      }
+    }
+    
+    function closeDropdownOutside(e) {
+      const dropdown = document.getElementById('profile-dropdown');
+      const userProfile = document.getElementById('user-profile');
+      
+      if (!userProfile.contains(e.target)) {
+        dropdown.hidden = true;
+        document.removeEventListener('click', closeDropdownOutside);
+      }
+    }
+    
+    // Setup dropdown links
+    document.getElementById('home-link').onclick = () => window.location.href = '../index.html';
+    document.getElementById('profile-link').onclick = () => window.location.href = 'profile.html';
+    document.getElementById('signout-link').onclick = async () => {
+      await firebase.auth().signOut();
+      window.location.href = 'auth.html';
+    };
+    
+    // Load favorites from Firestore
+    async function loadFavorites(userId) {
+      const loadingState = document.getElementById('loading-state');
+      const emptyState = document.getElementById('empty-state');
+      const favoritesList = document.getElementById('favorites-list');
+      const favoritesCount = document.getElementById('favorites-count');
+      
+      try {
+        const favorites = await window.FirestoreHelper.getAllFavorites(userId);
+        
+        loadingState.hidden = true;
+        
+        if (favorites.length === 0) {
+          emptyState.hidden = false;
+          favoritesList.hidden = true;
+          favoritesCount.textContent = '0 recipes';
+        } else {
+          emptyState.hidden = true;
+          favoritesList.hidden = false;
+          favoritesCount.textContent = `${favorites.length} ${favorites.length === 1 ? 'recipe' : 'recipes'}`;
+          
+          // Render favorite cards
+          renderFavoriteCards(favorites);
+        }
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+        loadingState.innerHTML = '<p style="color: #c62828;">Error loading favorites. Please try again.</p>';
+      }
+    }
+    
+    // Render favorite recipe cards
+    function renderFavoriteCards(favorites) {
+      const container = document.getElementById('favorites-list');
+      container.innerHTML = '';
+      
+      favorites.forEach((recipe) => {
+        const card = document.createElement('div');
+        card.className = 'recipe-card';
+        
+        // Fix image path - add ../ if needed
+        const imagePath = recipe.image.startsWith('assets/') ? `../${recipe.image}` : recipe.image;
+        
+        card.innerHTML = `
+          <button class="favorite-btn favorited" data-recipe-title="${recipe.title}" aria-label="Remove from favorites">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </button>
+          <img src="${imagePath}" alt="${recipe.title}" class="recipe-img" onerror="this.src='https://via.placeholder.com/280x200?text=Recipe+Image'">
+          <h3>${recipe.title}</h3>
+          <p>⏱️ ${recipe.time}</p>
+        `;
+        
+        // Card click - go to recipe detail (future feature)
+        card.onclick = (e) => {
+          if (!e.target.closest('.favorite-btn')) {
+            alert('Recipe detail view coming soon!');
+          }
+        };
+        
+        // Favorite button click
+        const favoriteBtn = card.querySelector('.favorite-btn');
+        favoriteBtn.onclick = async (e) => {
+          e.stopPropagation();
+          
+          // Remove from favorites
+          const success = await window.FirestoreHelper.removeFavorite(currentUser.uid, recipe.title);
+          
+          if (success) {
+            card.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+              card.remove();
+              
+              // Update count and check if empty
+              const remaining = container.children.length;
+              document.getElementById('favorites-count').textContent = `${remaining} ${remaining === 1 ? 'recipe' : 'recipes'}`;
+              
+              if (remaining === 0) {
+                document.getElementById('empty-state').hidden = false;
+                document.getElementById('favorites-list').hidden = true;
+              }
+            }, 300);
+            
+            showToast('Removed from favorites');
+          }
+        };
+        
+        container.appendChild(card);
+      });
+    }
+    
+    // Show toast notification
+    function showToast(message) {
+      const existingToast = document.querySelector('.toast-notification');
+      if (existingToast) existingToast.remove();
+      
+      const toast = document.createElement('div');
+      toast.className = 'toast-notification';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => toast.classList.add('show'), 100);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
