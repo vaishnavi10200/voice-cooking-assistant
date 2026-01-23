@@ -10,6 +10,7 @@ function initializeSearch(recipes) {
   
   const searchInput = document.getElementById('search-input');
   const searchClear = document.getElementById('search-clear');
+  const searchBtn = document.getElementById('search-btn');
   const randomBtn = document.getElementById('random-btn');
   const filterBtns = document.querySelectorAll('.filter-btn');
   
@@ -31,6 +32,17 @@ function initializeSearch(recipes) {
     searchInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         performSearch();
+        searchInput.blur(); // Remove focus after search
+      }
+    });
+  }
+  
+  // Search button click
+  if (searchBtn) {
+    searchBtn.addEventListener('click', () => {
+      performSearch();
+      if (searchInput) {
+        searchInput.blur(); // Remove focus after search
       }
     });
   }
