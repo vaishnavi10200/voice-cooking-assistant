@@ -13,6 +13,11 @@ window.onload = async function () {
   await loadRecipes();
   await initAuth();
   setupEventListeners();
+  
+  // Initialize search after recipes are loaded
+  if (window.SearchManager) {
+    window.SearchManager.initialize(recipes);
+  }
 };
 
 // Load recipes from JSON
@@ -20,7 +25,7 @@ async function loadRecipes() {
   try {
     const res = await fetch("recipes.json");
     recipes = await res.json();
-    loadRecipeCards();
+    // Don't call loadRecipeCards here - SearchManager will handle it
   } catch (error) {
     console.error("Error loading recipes:", error);
   }
@@ -170,8 +175,16 @@ function setupEventListeners() {
   }
   
   // Voice control buttons
-  document.getElementById('start-btn').addEventListener('click', handleStartVoice);
-  document.getElementById('stop-btn').addEventListener('click', handleStopVoice);
+  const startBtn = document.getElementById('start-btn');
+  const stopBtn = document.getElementById('stop-btn');
+  
+  if (startBtn) {
+    startBtn.addEventListener('click', handleStartVoice);
+  }
+  
+  if (stopBtn) {
+    stopBtn.addEventListener('click', handleStopVoice);
+  }
   
   // Guest notice dismiss
   const noticeClose = document.querySelector('.notice-close');
@@ -234,15 +247,6 @@ function loadRecipeCards() {
 
 // Select a recipe
 function selectRecipe(index) {
-  // Check if guest trying to use voice features
-  if (isGuest) {
-    const proceed = confirm('Voice cooking requires signing in. Sign in now?');
-    if (proceed) {
-      window.location.href = 'pages/auth.html';
-      return;
-    }
-  }
-  
   currentRecipe = recipes[index];
   currentStep = 0;
   voiceOnlyMode = false;
@@ -251,11 +255,17 @@ function selectRecipe(index) {
   document.getElementById('recipe-title').innerText = currentRecipe.title;
   document.getElementById('recipe-view').hidden = false;
   
-  speakText(`You selected ${currentRecipe.title}. Please click the start cooking button to begin.`);
+  // Scroll to recipe detail
+  document.getElementById('recipe-view').scrollIntoView({ behavior: 'smooth', block: 'start' });
   
-  // Save to session storage (not localStorage as per restrictions)
+  speakText(`You selected ${currentRecipe.title}. ${isGuest ? 'Please sign in to use voice features.' : 'Click start voice to begin cooking.'}`);
+  
+  // Save to session storage
   saveCookingSession();
 }
+
+// Export selectRecipe globally
+window.selectRecipe = selectRecipe;
 
 // Save cooking session
 function saveCookingSession() {
@@ -417,7 +427,7 @@ function handleVoiceCommand(command) {
 // Handle start voice button
 function handleStartVoice() {
   if (!currentRecipe) {
-    speakText('Please select a recipe first.');
+    alert('Please select a recipe first to use voice assistant');
     return;
   }
   
@@ -443,8 +453,10 @@ function handleStartVoice() {
   
   // Update button state
   const startBtn = document.getElementById('start-btn');
-  startBtn.innerHTML = '<span class="button-icon">🎤</span>Listening...<div class="status-indicator"></div>';
-  startBtn.style.background = 'linear-gradient(135deg, #00ff88, #00d4aa)';
+  if (startBtn) {
+    startBtn.innerHTML = '🎤 Listening...';
+    startBtn.style.background = 'linear-gradient(135deg, #00ff88, #00d4aa)';
+  }
   
   speakStep();
 }
@@ -452,7 +464,7 @@ function handleStartVoice() {
 // Handle stop voice button
 function handleStopVoice() {
   stopVoiceMode();
-  speakText('Voice assistant stopped. Click start cooking to resume.');
+  speakText('Voice assistant stopped. Click start voice to resume.');
 }
 
 // Stop voice mode
@@ -470,14 +482,16 @@ function stopVoiceMode() {
   
   // Update button state
   const startBtn = document.getElementById('start-btn');
-  startBtn.innerHTML = `
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-      <line x1="12" y1="19" x2="12" y2="23"></line>
-      <line x1="8" y1="23" x2="16" y2="23"></line>
-    </svg>
-    Start Voice
-  `;
-  startBtn.style.background = '';
+  if (startBtn) {
+    startBtn.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+        <line x1="12" y1="19" x2="12" y2="23"></line>
+        <line x1="8" y1="23" x2="16" y2="23"></line>
+      </svg>
+      Start Voice
+    `;
+    startBtn.style.background = '';
+  }
 }
