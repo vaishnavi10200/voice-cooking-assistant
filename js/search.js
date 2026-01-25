@@ -1,8 +1,11 @@
-// Search and Filter Logic
+// Search and Filter Logic with API Integration
 
 let currentSearchTerm = '';
 let currentFilter = 'all';
 let allRecipes = [];
+let apiRecipes = [];
+let isLoadingAPI = false;
+let hasSearchedAPI = false;
 
 // Initialize search functionality
 function initializeSearch(recipes) {
@@ -94,16 +97,34 @@ function initializeSearch(recipes) {
 }
 
 // Perform search and filter
-function performSearch() {
+async function performSearch() {
   let filteredRecipes = [...allRecipes];
   
-  // Apply text search
+  // Apply text search to local recipes
   if (currentSearchTerm) {
     filteredRecipes = filteredRecipes.filter(recipe => {
       return recipe.title.toLowerCase().includes(currentSearchTerm) ||
              recipe.category.toLowerCase().includes(currentSearchTerm) ||
              recipe.steps.some(step => step.toLowerCase().includes(currentSearchTerm));
     });
+    
+    // Search API if search term is provided and not already searched
+    if (!hasSearchedAPI && window.RecipeAPI) {
+      showLoadingState();
+      apiRecipes = await window.RecipeAPI.searchRecipes(currentSearchTerm);
+      hasSearchedAPI = true;
+      hideLoadingState();
+      
+      // Combine local and API results
+      filteredRecipes = [...filteredRecipes, ...apiRecipes];
+    } else if (hasSearchedAPI && apiRecipes.length > 0) {
+      // Include previously fetched API recipes
+      filteredRecipes = [...filteredRecipes, ...apiRecipes];
+    }
+  } else {
+    // No search term - clear API results
+    apiRecipes = [];
+    hasSearchedAPI = false;
   }
   
   // Apply difficulty filter
@@ -195,9 +216,16 @@ function renderRecipes(recipes) {
     // Card click handler
     card.onclick = (e) => {
       if (!e.target.closest('.favorite-btn')) {
-        const originalIndex = allRecipes.findIndex(r => r.title === recipe.title);
-        if (window.selectRecipe) {
-          window.selectRecipe(originalIndex);
+        // For API recipes, we need to handle differently
+        if (recipe.isFromAPI) {
+          if (window.selectAPIRecipe) {
+            window.selectAPIRecipe(recipe);
+          }
+        } else {
+          const originalIndex = allRecipes.findIndex(r => r.title === recipe.title);
+          if (window.selectRecipe) {
+            window.selectRecipe(originalIndex);
+          }
         }
       }
     };
@@ -258,8 +286,19 @@ function showRandomRecipe() {
 function clearSearch() {
   currentSearchTerm = '';
   currentFilter = 'all';
-  document.getElementById('search-input').value = '';
-  document.getElementById('search-clear').hidden = true;
+  apiRecipes = [];
+  hasSearchedAPI = false;
+  
+  const searchInput = document.getElementById('search-input');
+  const searchClear = document.getElementById('search-clear');
+  
+  if (searchInput) {
+    searchInput.value = '';
+  }
+  
+  if (searchClear) {
+    searchClear.hidden = true;
+  }
   
   // Reset filter buttons
   document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -267,6 +306,27 @@ function clearSearch() {
   });
   
   performSearch();
+}
+
+// Show loading state
+function showLoadingState() {
+  const container = document.getElementById('recipe-list');
+  const loadingDiv = document.createElement('div');
+  loadingDiv.id = 'api-loading';
+  loadingDiv.className = 'api-loading';
+  loadingDiv.innerHTML = `
+    <div class="loading-spinner"></div>
+    <p>Searching online recipes...</p>
+  `;
+  container.appendChild(loadingDiv);
+}
+
+// Hide loading state
+function hideLoadingState() {
+  const loading = document.getElementById('api-loading');
+  if (loading) {
+    loading.remove();
+  }
 }
 
 // Export functions

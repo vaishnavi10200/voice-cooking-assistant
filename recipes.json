@@ -113,5 +113,65 @@
       "Add sambar masala and temper with mustard seeds.",
       "Serve idli with hot sambar and coconut chutney."
     ]
+  },
+  {
+    "title": "Pani Puri",
+    "time": "30 mins",
+    "difficulty": "easy",
+    "category": "Indian",
+    "image": "assets/Pani-puri.jpg",
+    "steps": [
+      "Prepare spicy mint-coriander water (pani).",
+      "Make tamarind chutney with jaggery.",
+      "Boil and mash potatoes, mix with spices.",
+      "Make small puris and deep fry until crispy.",
+      "Fill puris with potato mixture and chickpeas.",
+      "Dip in pani and enjoy immediately!"
+    ]
+  },
+  {
+    "title": "Gulab Jamun",
+    "time": "45 mins",
+    "difficulty": "medium",
+    "category": "Dessert",
+    "image": "assets/Gulab-jamun.jpg",
+    "steps": [
+      "Mix khoya, maida, and baking soda to make dough.",
+      "Make small balls without cracks.",
+      "Deep fry on low heat until golden brown.",
+      "Prepare sugar syrup with cardamom and saffron.",
+      "Soak fried balls in warm syrup for 2 hours.",
+      "Serve warm or chilled, garnished with nuts."
+    ]
+  },
+  {
+    "title": "Samosa",
+    "time": "40 mins",
+    "difficulty": "medium",
+    "category": "Indian",
+    "image": "assets/samosa.jpg",
+    "steps": [
+      "Prepare dough with maida, oil, and water.",
+      "Make spiced potato filling with peas.",
+      "Roll dough into thin circles and cut in half.",
+      "Form cone shapes and fill with potato mixture.",
+      "Seal edges and deep fry until golden and crispy.",
+      "Serve hot with mint chutney and tamarind sauce."
+    ]
+  },
+  {
+    "title": "Butter Chicken",
+    "time": "50 mins",
+    "difficulty": "medium",
+    "category": "Indian",
+    "image": "assets/butter-chicken.jpg",
+    "steps": [
+      "Marinate chicken with yogurt and spices for 2 hours.",
+      "Grill or pan-fry marinated chicken pieces.",
+      "Prepare tomato-based gravy with butter and cream.",
+      "Add grilled chicken to the gravy.",
+      "Simmer for 10 minutes, add kasuri methi.",
+      "Garnish with cream and serve with naan or rice."
+    ]
   }
 ]

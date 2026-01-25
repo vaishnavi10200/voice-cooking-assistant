@@ -267,6 +267,52 @@ function selectRecipe(index) {
 // Export selectRecipe globally
 window.selectRecipe = selectRecipe;
 
+// Handle API recipe selection
+function selectAPIRecipe(recipe) {
+  currentRecipe = recipe;
+  currentStep = 0;
+  voiceOnlyMode = false;
+  isVoiceActive = false;
+  
+  document.getElementById('recipe-title').innerText = recipe.title;
+  document.getElementById('recipe-view').hidden = false;
+  
+  // Scroll to recipe detail
+  document.getElementById('recipe-view').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  
+  // Add source link for API recipes
+  const detailCard = document.querySelector('.detail-card');
+  let sourceLink = document.getElementById('recipe-source');
+  
+  if (recipe.sourceUrl && !sourceLink) {
+    sourceLink = document.createElement('a');
+    sourceLink.id = 'recipe-source';
+    sourceLink.className = 'recipe-source-link';
+    sourceLink.href = recipe.sourceUrl;
+    sourceLink.target = '_blank';
+    sourceLink.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+        <polyline points="15 3 21 3 21 9"></polyline>
+        <line x1="10" y1="14" x2="21" y2="3"></line>
+      </svg>
+      View Original Recipe
+    `;
+    const title = document.getElementById('recipe-title');
+    title.parentNode.insertBefore(sourceLink, title.nextSibling);
+  } else if (sourceLink && !recipe.sourceUrl) {
+    sourceLink.remove();
+  }
+  
+  speakText(`You selected ${recipe.title}. ${isGuest ? 'Please sign in to use voice features.' : 'Click start voice to begin cooking.'}`);
+  
+  // Save to session storage
+  saveCookingSession();
+}
+
+// Export API recipe selector
+window.selectAPIRecipe = selectAPIRecipe;
+
 // Save cooking session
 function saveCookingSession() {
   if (!isGuest && currentRecipe) {
