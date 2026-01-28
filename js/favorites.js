@@ -145,6 +145,23 @@ function showToast(message) {
   }, 3000);
 }
 
+firebase.auth().onAuthStateChanged((user) => {
+  if (!user) return;
+
+  const avatarEl = document.getElementById("user-avatar");
+  if (!avatarEl) return;
+
+  // fallback initial
+  avatarEl.textContent =
+    (user.displayName || user.email).charAt(0).toUpperCase();
+
+  // 🔥 Load Firestore avatar
+  if (window.loadUserAvatarToHeader) {
+    loadUserAvatarToHeader(user.uid);
+  }
+});
+
+
 // Export functions globally
 window.FavoritesManager = {
   initialize: initializeFavorites,

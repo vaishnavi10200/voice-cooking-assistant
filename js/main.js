@@ -75,13 +75,13 @@ function updateUIForAuthenticatedUser(user) {
   const displayName = user.displayName || user.email.split('@')[0];
   userName.textContent = displayName;
   
-  // Update avatar (use first letter of name or photo)
-  if (user.photoURL) {
-    userAvatar.innerHTML = `<img src="${user.photoURL}" alt="${displayName}" class="avatar-img">`;
-  } else {
-    userAvatar.textContent = displayName.charAt(0).toUpperCase();
-  }
-  
+    // Update avatar (fallback first letter)
+  userAvatar.textContent = displayName.charAt(0).toUpperCase();
+
+  // Load Firestore avatar if exists
+  if (window.loadUserAvatarToHeader) {
+    loadUserAvatarToHeader(user.uid);
+  }  
   // Show profile dropdown functionality
   userAvatar.style.cursor = 'pointer';
   userAvatar.onclick = toggleProfileDropdown;

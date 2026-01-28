@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile - Voice Kitchen</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="../style.css" rel="stylesheet">
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-top">
+        <div class="logo">
+          <img src="../assets/voice-kitchen-logo.png" class="logo-img" />
+        </div>
+
+        <div class="user-profile" id="user-profile">
+          <span class="user-name" id="user-name">Loading</span>
+          <div class="avatar" id="user-avatar">👤</div>
+
+          <div class="profile-dropdown" id="profile-dropdown" hidden>
+            <div class="dropdown-item" id="home-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              Home
+            </div>
+            <div class="dropdown-item" id="favorites-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+              Favorites
+            </div>
+
+            <div class="dropdown-divider"></div>
+
+            <div class="dropdown-item" id="signout-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              Sign Out
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-main">
+        <h1 class="main-heading">My Profile</h1>
+        <p class="sub-heading">Account overview</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Profile Content -->
+  <main class="container">
+    <section class="profile-section">
+      <div class="profile-card">
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+          <div class="profile-avatar-large" id="profile-avatar-large" title="Change avatar" style="cursor:pointer;">👤</div>
+
+          <div class="profile-info">
+            <h2 id="profile-name">—</h2>
+            <p id="profile-email">—</p>
+            <p class="profile-joined" id="profile-joined">—</p>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="profile-stats">
+          <div class="stat-card">
+            <div class="stat-icon">❤️</div>
+            <div>
+              <div class="stat-number" id="favorites-count">0</div>
+              <div class="stat-label">Favorites</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">👤</div>
+            <div>
+              <div class="stat-number" id="account-type">—</div>
+              <div class="stat-label">Account Type</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="profile-section-divider">
+          <h3 class="section-heading">Account Actions</h3>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn-action secondary" id="edit-name-btn">
+            Edit Display Name
+          </button>
+
+          <button class="btn-action secondary" id="change-password-btn">
+            Change Password
+          </button>
+        </div>
+
+        <!-- Sign Out -->
+        <div class="profile-footer">
+          <button class="btn-signout" id="profile-signout-btn">
+            Sign Out
+          </button>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Reusable Modal -->
+  <div class="modal" id="profile-modal" hidden>
+    <div class="modal-overlay" id="modal-overlay"></div>
+
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Modal</h3>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+
+      <div id="modal-body"></div>
+
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" id="modal-cancel">Cancel</button>
+        <button class="btn-modal-submit" id="modal-submit">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/firestore.js"></script>
+  <script src="../js/profile.js"></script>
+</body>
+</html>

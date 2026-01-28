@@ -25,7 +25,6 @@ const FirestoreHelper = {
         steps: recipe.steps,
         addedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      console.log('Recipe added to favorites:', recipe.title);
       return true;
     } catch (error) {
       console.error('Error adding favorite:', error);
@@ -38,7 +37,6 @@ const FirestoreHelper = {
     try {
       const favRef = this.getUserFavoritesRef(userId);
       await favRef.doc(recipeTitle).delete();
-      console.log('Recipe removed from favorites:', recipeTitle);
       return true;
     } catch (error) {
       console.error('Error removing favorite:', error);
@@ -65,10 +63,7 @@ const FirestoreHelper = {
       const snapshot = await favRef.orderBy('addedAt', 'desc').get();
       
       const favorites = [];
-      snapshot.forEach(doc => {
-        favorites.push(doc.data());
-      });
-      
+      snapshot.forEach(doc => favorites.push(doc.data()));
       return favorites;
     } catch (error) {
       console.error('Error getting favorites:', error);
@@ -86,7 +81,6 @@ const FirestoreHelper = {
         image: recipe.image,
         completedAt: completedAt || firebase.firestore.FieldValue.serverTimestamp()
       });
-      console.log('Cooking history saved:', recipe.title);
       return true;
     } catch (error) {
       console.error('Error saving history:', error);
@@ -104,10 +98,7 @@ const FirestoreHelper = {
         .get();
       
       const history = [];
-      snapshot.forEach(doc => {
-        history.push(doc.data());
-      });
-      
+      snapshot.forEach(doc => history.push(doc.data()));
       return history;
     } catch (error) {
       console.error('Error getting history:', error);
@@ -116,7 +107,53 @@ const FirestoreHelper = {
   }
 };
 
-// Export helper globally
+// 🔥 EXPORT FIRST (THIS IS THE KEY FIX)
 window.FirestoreHelper = FirestoreHelper;
 
+// ===========================
+// AVATAR HELPERS (Base64)
+// ===========================
+async function saveUserAvatar(userId, base64Image) {
+  await db.collection("users").doc(userId).set(
+    { avatar: base64Image },
+    { merge: true }
+  );
+}
+
+async function getUserAvatar(userId) {
+  const doc = await db.collection("users").doc(userId).get();
+  if (!doc.exists) return null;
+  return doc.data().avatar || null;
+}
+
+// Attach avatar helpers
+window.FirestoreHelper.saveUserAvatar = saveUserAvatar;
+window.FirestoreHelper.getUserAvatar = getUserAvatar;
+
 console.log('Firestore initialized successfully');
+
+// ===========================
+// LOAD AVATAR INTO HEADER
+// ===========================
+async function loadUserAvatarToHeader(userId) {
+  if (!window.FirestoreHelper) return;
+
+  const avatar = await FirestoreHelper.getUserAvatar(userId);
+  if (!avatar) return;
+
+  const avatarEl = document.getElementById("user-avatar");
+  if (!avatarEl) return;
+
+  const img = document.createElement("img");
+  img.src = avatar;
+  img.className = "profile-avatar-img";
+
+  img.onload = () => {
+    avatarEl.innerHTML = "";
+    avatarEl.appendChild(img);
+  };
+}
+
+// expose globally
+window.loadUserAvatarToHeader = loadUserAvatarToHeader;
+
