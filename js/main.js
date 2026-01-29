@@ -8,6 +8,10 @@ let isVoiceActive = false;
 let currentUser = null;
 let isGuest = true;
 
+// Mic test variables
+let micTestRecognition = null;
+let isMicTesting = false;
+
 // Initialize app when page loads
 window.onload = async function () {
   await loadRecipes();
@@ -177,6 +181,7 @@ function setupEventListeners() {
   // Voice control buttons
   const startBtn = document.getElementById('start-btn');
   const stopBtn = document.getElementById('stop-btn');
+  const testMicBtn = document.getElementById('test-mic-btn');
   
   if (startBtn) {
     startBtn.addEventListener('click', handleStartVoice);
@@ -185,6 +190,13 @@ function setupEventListeners() {
   if (stopBtn) {
     stopBtn.addEventListener('click', handleStopVoice);
   }
+  
+  if (testMicBtn) {
+    testMicBtn.addEventListener('click', openMicTestModal);
+  }
+  
+  // Mic test modal event listeners
+  setupMicTestListeners();
   
   // Guest notice dismiss
   const noticeClose = document.querySelector('.notice-close');
@@ -267,7 +279,7 @@ function selectRecipe(index) {
 // Export selectRecipe globally
 window.selectRecipe = selectRecipe;
 
-// Handle API recipe selection
+// Select API recipe
 function selectAPIRecipe(recipe) {
   currentRecipe = recipe;
   currentStep = 0;
@@ -411,63 +423,191 @@ if (SpeechRecognition) {
   };
 }
 
-// Handle voice commands
+// ============================================================
+// ENHANCED VOICE COMMAND MATCHING WITH FLEXIBLE VARIATIONS
+// ============================================================
+
+// Command pattern definitions with multiple variations
+const COMMAND_PATTERNS = {
+  next: [
+    'next', 'next step', 'continue', 'move forward', 'go ahead', 
+    'proceed', 'move on', 'keep going', 'forward', 'onwards',
+    'next one', 'go on', 'carry on', 'advance', 'go next'
+  ],
+  
+  previous: [
+    'back', 'previous', 'go back', 'last step', 'previous step',
+    'step back', 'go backwards', 'backwards', 'rewind', 'earlier',
+    'before', 'prior step', 'last one', 'go to previous'
+  ],
+  
+  repeat: [
+    'repeat', 'say again', 'again', 'what was that', 'one more time',
+    'repeat step', 'say that again', 'can you repeat', 'repeat that',
+    'tell me again', 'come again', 'pardon', 'once more'
+  ],
+  
+  startOver: [
+    'start over', 'restart', 'begin again', 'from the beginning',
+    'start from beginning', 'reset', 'go to start', 'first step',
+    'go to first', 'beginning', 'start again', 'from start'
+  ],
+  
+  stop: [
+    'stop', 'pause', 'halt', 'end', 'quit', 'exit', 'finish',
+    'stop voice', 'stop listening', 'turn off', 'shut up',
+    'be quiet', 'silence', 'enough', 'cancel'
+  ],
+  
+  help: [
+    'help', 'what can i say', 'commands', 'options', 'instructions',
+    'what do i say', 'how does this work', 'guide me', 'assist',
+    'what are the commands', 'show commands', 'voice commands'
+  ]
+};
+
+// Check if command matches any pattern
+function matchesCommand(transcript, commandType) {
+  const patterns = COMMAND_PATTERNS[commandType];
+  if (!patterns) return false;
+  
+  // Check for exact matches or partial matches
+  return patterns.some(pattern => {
+    // Exact match
+    if (transcript === pattern) return true;
+    
+    // Contains match (for multi-word commands)
+    if (transcript.includes(pattern)) return true;
+    
+    // Word boundary match (ensures whole word matching)
+    const regex = new RegExp(`\\b${pattern}\\b`, 'i');
+    return regex.test(transcript);
+  });
+}
+
+// Extract step number from command
+function extractStepNumber(transcript) {
+  // Match patterns like "go to step 3", "step 5", "jump to step 2"
+  const patterns = [
+    /(?:go\s+to\s+)?step\s+(\d+)/i,
+    /(?:jump\s+to\s+)?step\s+(\d+)/i,
+    /step\s+number\s+(\d+)/i,
+    /(\d+)(?:st|nd|rd|th)\s+step/i
+  ];
+  
+  for (const pattern of patterns) {
+    const match = transcript.match(pattern);
+    if (match) {
+      return parseInt(match[1]);
+    }
+  }
+  
+  return null;
+}
+
+// Handle voice commands with flexible matching
 function handleVoiceCommand(command) {
   if (!currentRecipe || !isVoiceActive) {
     return;
   }
 
-  if (command.includes('go to step')) {
-    const stepNumber = parseInt(command.split('step')[1]);
-    if (!isNaN(stepNumber) && stepNumber >= 1 && stepNumber <= currentRecipe.steps.length) {
-      currentStep = stepNumber - 1;
-      speakStep();
-    } else {
-      speakText('Step number out of range.');
+  // Normalize command
+  const normalizedCommand = command.toLowerCase().trim();
+  
+  // Check for "go to step X" or "repeat step X"
+  if (normalizedCommand.includes('step')) {
+    const stepNumber = extractStepNumber(normalizedCommand);
+    
+    if (stepNumber !== null) {
+      // Go to specific step
+      if (normalizedCommand.includes('go to') || normalizedCommand.includes('jump to')) {
+        if (stepNumber >= 1 && stepNumber <= currentRecipe.steps.length) {
+          currentStep = stepNumber - 1;
+          speakStep();
+          document.getElementById('assistant-reply').innerText = `Assistant: Moving to step ${stepNumber}`;
+        } else {
+          speakText(`Step number out of range. Please choose a step between 1 and ${currentRecipe.steps.length}.`);
+          document.getElementById('assistant-reply').innerText = 'Assistant: Step number out of range';
+        }
+        return;
+      }
+      
+      // Repeat specific step
+      if (normalizedCommand.includes('repeat')) {
+        if (stepNumber >= 1 && stepNumber <= currentRecipe.steps.length) {
+          speakText(currentRecipe.steps[stepNumber - 1]);
+          document.getElementById('assistant-reply').innerText = `Assistant: Repeating step ${stepNumber}`;
+        } else {
+          speakText('Cannot repeat that step.');
+          document.getElementById('assistant-reply').innerText = 'Assistant: Cannot repeat that step';
+        }
+        return;
+      }
     }
-    return;
   }
 
-  if (command.includes('repeat step')) {
-    const stepNumber = parseInt(command.split('step')[1]);
-    if (!isNaN(stepNumber) && stepNumber >= 1 && stepNumber <= currentRecipe.steps.length) {
-      speakText(currentRecipe.steps[stepNumber - 1]);
-    } else {
-      speakText('Cannot repeat that step.');
-    }
-    return;
-  }
-
-  if (command.includes('next')) {
+  // Check for NEXT command
+  if (matchesCommand(normalizedCommand, 'next')) {
     if (currentStep < currentRecipe.steps.length - 1) {
       currentStep++;
       speakStep();
+      document.getElementById('assistant-reply').innerText = `Assistant: Moving to next step (${currentStep + 1} of ${currentRecipe.steps.length})`;
     } else {
-      speakText("You're done! Bon appétit!");
+      speakText("You've completed all steps! Bon appétit!");
+      document.getElementById('assistant-reply').innerText = 'Assistant: Recipe completed!';
       stopVoiceMode();
     }
-  } else if (command.includes('repeat')) {
+    return;
+  }
+
+  // Check for REPEAT command
+  if (matchesCommand(normalizedCommand, 'repeat')) {
     speakStep();
-  } else if (command.includes('back') || command.includes('previous')) {
+    document.getElementById('assistant-reply').innerText = `Assistant: Repeating step ${currentStep + 1}`;
+    return;
+  }
+
+  // Check for PREVIOUS/BACK command
+  if (matchesCommand(normalizedCommand, 'previous')) {
     if (currentStep > 0) {
       currentStep--;
       speakStep();
+      document.getElementById('assistant-reply').innerText = `Assistant: Going back to step ${currentStep + 1}`;
     } else {
       speakText("You're already at the first step.");
+      document.getElementById('assistant-reply').innerText = 'Assistant: Already at first step';
     }
-  } else if (command.includes('start over')) {
-    currentStep = 0;
-    speakStep();
-  } else if (command.includes('stop')) {
-    stopVoiceMode();
-    speakText('Voice mode stopped.');
-  } else if (command.includes('help')) {
-    speakText('Say next, repeat, back, go to step 2, or start over.');
-  } else {
-    speakText('Command not understood. Say help for options.');
+    return;
   }
 
-  document.getElementById('assistant-reply').innerText = 'Assistant: Command executed — ' + command;
+  // Check for START OVER command
+  if (matchesCommand(normalizedCommand, 'startOver')) {
+    currentStep = 0;
+    speakStep();
+    document.getElementById('assistant-reply').innerText = 'Assistant: Starting over from step 1';
+    return;
+  }
+
+  // Check for STOP command
+  if (matchesCommand(normalizedCommand, 'stop')) {
+    stopVoiceMode();
+    speakText('Voice mode stopped.');
+    document.getElementById('assistant-reply').innerText = 'Assistant: Voice mode stopped';
+    return;
+  }
+
+  // Check for HELP command
+  if (matchesCommand(normalizedCommand, 'help')) {
+    const helpText = 'You can say: next, previous, repeat, start over, go to step 3, or stop. What would you like to do?';
+    speakText(helpText);
+    document.getElementById('assistant-reply').innerText = 'Assistant: ' + helpText;
+    return;
+  }
+
+  // Command not recognized
+  console.log('Unrecognized command:', normalizedCommand);
+  speakText("I didn't understand that. Say 'help' to hear available commands.");
+  document.getElementById('assistant-reply').innerText = `Assistant: Command not recognized. Try saying "help"`;
 }
 
 // Handle start voice button
@@ -530,14 +670,186 @@ function stopVoiceMode() {
   const startBtn = document.getElementById('start-btn');
   if (startBtn) {
     startBtn.innerHTML = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-        <line x1="12" y1="19" x2="12" y2="23"></line>
-        <line x1="8" y1="23" x2="16" y2="23"></line>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="5 3 19 12 5 21 5 3"></polygon>
       </svg>
-      Start Voice
+      Start
     `;
     startBtn.style.background = '';
+  }
+}
+
+// ============================================================
+// MIC TEST FUNCTIONALITY
+// ============================================================
+
+function setupMicTestListeners() {
+  const modal = document.getElementById('mic-test-modal');
+  const closeBtn = document.getElementById('close-mic-test');
+  const overlay = modal?.querySelector('.mic-modal-overlay');
+  const startTest = document.getElementById('start-mic-test');
+  const stopTest = document.getElementById('stop-mic-test');
+  
+  
+  if (closeBtn) {
+    closeBtn.onclick = closeMicTestModal;
+  }
+  
+  if (overlay) {
+    overlay.onclick = closeMicTestModal;
+  }
+  
+  if (startTest) {
+    startTest.onclick = startMicTest;
+  }
+  
+  if (stopTest) {
+    stopTest.onclick = stopMicTest;
+  }
+}
+
+function openMicTestModal() {
+  const modal = document.getElementById('mic-test-modal');
+  if (!modal) return;
+  
+  // Check browser support
+  if (!SpeechRecognition) {
+    alert('Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari.');
+    return;
+  }
+  
+  // Reset modal state
+  document.getElementById('mic-status-text').textContent = 'Click "Start Test" to begin';
+  document.getElementById('mic-transcript').textContent = 'Waiting for input...';
+  document.getElementById('mic-status').classList.remove('listening');
+  
+  // Show modal
+  modal.hidden = false;
+  document.body.style.overflow = 'hidden';
+  
+  // Initialize mic test recognition if not already done
+  if (!micTestRecognition) {
+    initMicTestRecognition();
+  }
+}
+
+function closeMicTestModal() {
+  const modal = document.getElementById('mic-test-modal');
+  if (!modal) return;
+  
+  // Stop mic test if running
+  if (isMicTesting) {
+    stopMicTest();
+  }
+  
+  // Hide modal
+  modal.hidden = true;
+  document.body.style.overflow = '';
+}
+
+function initMicTestRecognition() {
+  if (!SpeechRecognition) return;
+  
+  micTestRecognition = new SpeechRecognition();
+  micTestRecognition.continuous = true;
+  micTestRecognition.interimResults = true;
+  micTestRecognition.lang = 'en-IN';
+  
+  micTestRecognition.onstart = () => {
+    console.log('Mic test started');
+    isMicTesting = true;
+    document.getElementById('mic-status-text').textContent = '🎤 Listening... Try speaking now!';
+    document.getElementById('mic-status').classList.add('listening');
+    
+    // Update buttons
+    document.getElementById('start-mic-test').disabled = true;
+    document.getElementById('stop-mic-test').disabled = false;
+  };
+  
+  micTestRecognition.onend = () => {
+    console.log('Mic test ended');
+    isMicTesting = false;
+    document.getElementById('mic-status-text').textContent = 'Test stopped. Click "Start Test" to try again.';
+    document.getElementById('mic-status').classList.remove('listening');
+    
+    // Update buttons
+    document.getElementById('start-mic-test').disabled = false;
+    document.getElementById('stop-mic-test').disabled = true;
+  };
+  
+  micTestRecognition.onerror = (event) => {
+    console.log('Mic test error:', event.error);
+    
+    let errorMessage = 'Error occurred. Please try again.';
+    
+    if (event.error === 'not-allowed' || event.error === 'permission-denied') {
+      errorMessage = '❌ Microphone permission denied. Please allow microphone access.';
+    } else if (event.error === 'no-speech') {
+      errorMessage = '🔇 No speech detected. Please speak louder or check your microphone.';
+    } else if (event.error === 'audio-capture') {
+      errorMessage = '❌ No microphone found. Please connect a microphone.';
+    } else if (event.error === 'network') {
+      errorMessage = '📡 Network error. Please check your internet connection.';
+    }
+    
+    document.getElementById('mic-status-text').textContent = errorMessage;
+    document.getElementById('mic-status').classList.remove('listening');
+    
+    isMicTesting = false;
+    document.getElementById('start-mic-test').disabled = false;
+    document.getElementById('stop-mic-test').disabled = true;
+  };
+  
+  micTestRecognition.onresult = (event) => {
+    const transcript = event.results[event.results.length - 1][0].transcript.trim();
+    console.log('Mic test detected:', transcript);
+    
+    // Update transcript display
+    document.getElementById('mic-transcript').textContent = transcript;
+    
+    // Provide feedback on recognized commands
+    let feedback = '';
+    if (matchesCommand(transcript.toLowerCase(), 'next')) {
+      feedback = ' ✅ "Next" command recognized!';
+    } else if (matchesCommand(transcript.toLowerCase(), 'previous')) {
+      feedback = ' ✅ "Back/Previous" command recognized!';
+    } else if (matchesCommand(transcript.toLowerCase(), 'repeat')) {
+      feedback = ' ✅ "Repeat" command recognized!';
+    } else if (matchesCommand(transcript.toLowerCase(), 'help')) {
+      feedback = ' ✅ "Help" command recognized!';
+    }
+    
+    if (feedback) {
+      document.getElementById('mic-status-text').textContent = '🎤 Listening...' + feedback;
+    }
+  };
+}
+
+function startMicTest() {
+  if (!micTestRecognition) {
+    initMicTestRecognition();
+  }
+  
+  try {
+    micTestRecognition.start();
+  } catch (e) {
+    console.log('Error starting mic test:', e);
+    if (e.name === 'InvalidStateError') {
+      // Already running, stop and restart
+      micTestRecognition.stop();
+      setTimeout(() => {
+        micTestRecognition.start();
+      }, 100);
+    }
+  }
+}
+
+function stopMicTest() {
+  if (micTestRecognition && isMicTesting) {
+    try {
+      micTestRecognition.stop();
+    } catch (e) {
+      console.log('Error stopping mic test:', e);
+    }
   }
 }

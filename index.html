@@ -110,6 +110,15 @@
               <span class="voice-label">Voice Assistant</span>
             </div>
             <div class="voice-actions">
+              <button class="btn-voice-compact" id="test-mic-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+                Test Mic
+              </button>
               <button class="btn-voice-compact" id="start-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -193,6 +202,62 @@
     <div class="notice-content">
       <p>👋 You're browsing as a guest. <a href="pages/auth.html" class="notice-link">Sign in</a> to use voice features and save favorites!</p>
       <button class="notice-close" onclick="this.parentElement.parentElement.hidden = true">×</button>
+    </div>
+  </div>
+
+  <!-- Mic Test Modal -->
+  <div id="mic-test-modal" class="mic-modal" hidden>
+    <div class="mic-modal-overlay"></div>
+    <div class="mic-modal-content">
+      <div class="mic-modal-header">
+        <h3>🎤 Microphone Test</h3>
+        <button class="mic-modal-close" id="close-mic-test">×</button>
+      </div>
+      
+      <div class="mic-modal-body">
+        <div class="mic-status" id="mic-status">
+          <div class="mic-icon-container">
+            <svg class="mic-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          </div>
+          <p class="mic-status-text" id="mic-status-text">Click "Start Test" to begin</p>
+        </div>
+        
+        <div class="mic-transcript">
+          <p class="mic-transcript-label">You said:</p>
+          <p class="mic-transcript-text" id="mic-transcript">Waiting for input...</p>
+        </div>
+        
+        <!-- <div class="mic-instructions">
+          <p><strong>💡 Test your microphone:</strong></p>
+          <ul>
+            <li>Click "Start Test" below</li>
+            <li>Say something like "Hello" or "Testing"</li>
+            <li>Your speech will appear above</li>
+            <li>Try voice commands: "next", "repeat", "back"</li>
+          </ul>
+        </div> -->
+      </div>
+      
+      <div class="mic-modal-footer">
+        <button class="btn-mic-test" id="start-mic-test">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Start Test
+        </button>
+        <button class="btn-mic-test secondary" id="stop-mic-test">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          </svg>
+          Stop Test
+        </button>
+      </div>
     </div>
   </div>
 
