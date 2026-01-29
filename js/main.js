@@ -205,6 +205,18 @@ function setupEventListeners() {
       sessionStorage.setItem('guestNoticeDismissed', 'true');
     };
   }
+  
+  // Voice commands toggle
+  const voiceCommandsToggle = document.getElementById('voice-commands-toggle');
+  const voiceCommandsContent = document.getElementById('voice-commands-content');
+  
+  if (voiceCommandsToggle && voiceCommandsContent) {
+    voiceCommandsToggle.addEventListener('click', () => {
+      const isHidden = voiceCommandsContent.hidden;
+      voiceCommandsContent.hidden = !isHidden;
+      voiceCommandsToggle.classList.toggle('active');
+    });
+  }
 }
 
 // Load recipe cards
@@ -641,7 +653,7 @@ function handleStartVoice() {
   const startBtn = document.getElementById('start-btn');
   if (startBtn) {
     startBtn.innerHTML = '🎤 Listening...';
-    startBtn.style.background = 'linear-gradient(135deg, #00ff88, #00d4aa)';
+    startBtn.style.background = '#12d87c';
   }
   
   speakStep();
