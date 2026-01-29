@@ -1822,9 +1822,7 @@ body {
     padding: 16px;
   }
 }
-/* ============================================
-   MIC TEST MODAL STYLES
-   ============================================ */
+/*  MIC TEST MODAL STYLES */
 .mic-modal {
   position: fixed;
   top: 0;
@@ -2059,9 +2057,7 @@ body {
   transform: none !important;
 }
 
-/* ============================================
-   AVAILABLE VOICE COMMANDS SECTION
-   ============================================ */
+/*  AVAILABLE VOICE COMMANDS SECTION */
 
 .voice-commands-section {
   margin: 32px 0 48px;
